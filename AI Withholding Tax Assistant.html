@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI Withholding Tax Assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f4f6f5;--card:#fff;--ink:#17211d;--mute:#5d6b65;--line:#dbe2de;--acc:#0f6b57;--acc-ink:#fff;--soft:#e6f2ee;--warn:#fff4dc;--warn-ink:#7a4a00;--bad:#fde8e6;--bad-ink:#8c2217;--ok:#e3f4e8;--ok-ink:#1d6a35}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1512;--card:#18211d;--ink:#e8efeb;--mute:#9aaaa3;--line:#2b3832;--acc:#3fbf9f;--acc-ink:#06201a;--soft:#1d2b26;--warn:#33290f;--warn-ink:#f0c870;--bad:#3a1b18;--bad-ink:#f3a8a0;--ok:#16301f;--ok-ink:#8fd8a5}}
+:root[data-theme="dark"]{--bg:#0f1512;--card:#18211d;--ink:#e8efeb;--mute:#9aaaa3;--line:#2b3832;--acc:#3fbf9f;--acc-ink:#06201a;--soft:#1d2b26;--warn:#33290f;--warn-ink:#f0c870;--bad:#3a1b18;--bad-ink:#f3a8a0;--ok:#16301f;--ok-ink:#8fd8a5}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 "Noto Sans Thai",system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif}
+header{padding:22px 20px 8px;max-width:1180px;margin:0 auto}
+h1{font-size:22px;margin:0 0 4px}header p{margin:0;color:var(--mute);font-size:14px}
+main{max-width:1180px;margin:0 auto;padding:12px 20px 40px;display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:18px;align-items:start}
+@media(max-width:860px){main{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:14px}
+.card h2{font-size:15px;margin:0 0 10px;display:flex;gap:8px;align-items:center}
+.num{background:var(--acc);color:var(--acc-ink);border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;flex:none}
+label{display:block;font-size:13px;color:var(--mute);margin:10px 0 4px}
+input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:8px 10px}
+textarea{resize:vertical;min-height:70px}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--acc);outline-offset:0}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button{font:inherit;cursor:pointer;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px}
+button.p{background:var(--acc);color:var(--acc-ink);border-color:var(--acc);font-weight:700;width:100%;padding:11px;margin-top:6px}
+button:disabled{opacity:.55;cursor:wait}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}.chips button{font-size:12px;padding:4px 10px;border-radius:99px;background:var(--soft)}
+details summary{cursor:pointer;font-weight:700;font-size:15px}
+details textarea{min-height:230px;font-size:13px;margin-top:10px}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.tools button{font-size:13px;padding:5px 10px}
+.banner{border-radius:12px;padding:12px 14px;margin-bottom:14px;font-weight:500}
+.b-ok{background:var(--ok);color:var(--ok-ink)}.b-warn{background:var(--warn);color:var(--warn-ink)}.b-bad{background:var(--bad);color:var(--bad-ink)}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:6px 12px;font-size:14px}.kv dt{color:var(--mute)}.kv dd{margin:0}
+@media(max-width:520px){.kv{grid-template-columns:1fr}.kv dt{margin-top:6px}}
+.scroll{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:14px}td{padding:7px 4px;border-bottom:1px dashed var(--line)}td:last-child{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+tr.t td{font-weight:700;border-bottom:0;font-size:16px;color:var(--acc)}
+ul{margin:6px 0 0;padding-left:20px}li{margin:3px 0}a{color:var(--acc)}
+.empty{color:var(--mute);text-align:center;padding:40px 10px}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--acc);border-radius:50%;animation:s 1s linear infinite;vertical-align:-2px;margin-right:8px}@keyframes s{to{transform:rotate(360deg)}}
+.note{font-size:12px;color:var(--mute)}
+footer{max-width:1180px;margin:0 auto;padding:0 20px 30px;color:var(--mute);font-size:12px}
+</style>
+</head>
+<body>
+<header>
+<h1>AI Withholding Tax Assistant</h1>
+<p>วิเคราะห์ภาษีเงินได้หัก ณ ที่จ่ายตามกฎหมายไทย สำหรับธุรกรรมทั่วไประหว่างบริษัทไทยกับผู้รับเงินในไทย</p>
+</header>
+<main>
+<section>
+<div class="card">
+<details id="mp">
+<summary>Master Prompt <span class="note">(แก้ไขได้ก่อนวิเคราะห์)</span></summary>
+<textarea id="master" spellcheck="false"></textarea>
+<div class="tools"><button id="reset" type="button">คืนค่าเริ่มต้น</button><button id="copy" type="button">คัดลอก prompt ที่ประกอบแล้ว</button></div>
+</details>
+</div>
+<form id="f" class="card" autocomplete="off">
+<h2><span class="num">1</span>ข้อมูลนำเข้า</h2>
+<div class="chips"><span class="note" style="align-self:center">ตัวอย่าง:</span>
+<button type="button" data-ex="0">ค่าออกแบบ</button><button type="button" data-ex="1">ค่าขนส่ง</button><button type="button" data-ex="2">ค่าเช่า</button><button type="button" data-ex="3">ซื้อมันสำปะหลัง</button></div>
+<div class="row">
+<div><label for="payer">ผู้จ่ายเงิน</label><select id="payer"><option>บริษัทจำกัด / บริษัทมหาชน</option><option>ห้างหุ้นส่วนนิติบุคคล</option><option>นิติบุคคลอื่น</option><option>บุคคลธรรมดา</option><option>ไม่ทราบ</option></select></div>
+<div><label for="payee">ผู้รับเงิน</label><select id="payee"><option>บริษัทจำกัด / บริษัทมหาชน</option><option>ห้างหุ้นส่วนนิติบุคคล</option><option>บุคคลธรรมดา</option><option>มูลนิธิ / สมาคม</option><option>กลุ่มเกษตรกร / สหกรณ์</option><option>หน่วยงานรัฐ</option><option>ไม่ทราบ</option></select></div>
+</div>
+<label for="res">ถิ่นที่อยู่ของผู้รับเงิน</label>
+<select id="res"><option>ในประเทศไทย</option><option>ต่างประเทศ</option><option>ไม่ทราบ</option></select>
+<label for="desc">ลักษณะงาน / รายการที่จ่าย / เงื่อนไขสัญญา *</label>
+<textarea id="desc" placeholder="เช่น ค่าจ้างออกแบบโลโก้และคู่มือแบรนด์ ผู้รับจ้างเป็นผู้ออกแบบเองทั้งหมด ไม่มีวัสดุ"></textarea>
+<div class="row">
+<div><label for="amt">จำนวนเงินตามใบแจ้งหนี้ (บาท) *</label><input id="amt" type="number" min="0" step="0.01" inputmode="decimal"></div>
+<div><label for="date">วันที่จ่ายเงิน *</label><input id="date" type="date"></div>
+</div>
+<div class="row">
+<div><label for="vm">VAT</label><select id="vm"><option value="none">ไม่มี VAT</option><option value="sep" selected>มี VAT แยกจากราคา</option><option value="inc">ราคารวม VAT ไม่แยก</option></select></div>
+<div id="vw"><label for="vat">จำนวน VAT (บาท)</label><input id="vat" type="number" min="0" step="0.01" inputmode="decimal" placeholder="เว้นว่าง = 7%"></div>
+</div>
+<label for="sp">ข้อมูลพิเศษ / เงื่อนไขเพิ่มเติม (ถ้ามี)</label>
+<textarea id="sp" style="min-height:56px" placeholder="เช่น มีหนังสือรับรองการยกเว้น, จ่ายผ่านระบบ e-Withholding Tax"></textarea>
+<button class="p" id="go" type="submit">วิเคราะห์ภาษีหัก ณ ที่จ่าย</button>
+<p class="note" id="nosample" hidden>ฟังก์ชันวิเคราะห์ด้วย AI ใช้ไม่ได้ในมุมมองนี้ คุณยังคัดลอก prompt ที่ประกอบแล้วไปใช้กับ Claude ได้</p>
+</form>
+</section>
+<section id="out" aria-live="polite"><div class="card empty">กรอกข้อมูลทางซ้ายแล้วกด “วิเคราะห์” เพื่อดูผลลัพธ์</div></section>
+</main>
+<footer>ผลลัพธ์ใช้เพื่อการศึกษาเท่านั้น ต้องผ่านการตรวจสอบโดยนักบัญชีหรือผู้เชี่ยวชาญก่อนนำไปปฏิบัติจริง</footer>
+<script>
+const DEFAULT_MASTER=`คุณคือ AI Withholding Tax Assistant ผู้ช่วยวิเคราะห์ภาษีเงินได้หัก ณ ที่จ่ายตามกฎหมายไทย สำหรับธุรกรรมทั่วไปของบริษัทไทยกับผู้รับเงินในไทย
+1) ตรวจสอบสถานะผู้จ่าย/ผู้รับ ถิ่นที่อยู่ ลักษณะงาน จำนวนเงิน VAT วันที่จ่าย และเงื่อนไขพิเศษก่อนวิเคราะห์
+2) หากข้อมูลจำเป็นขาดหาย ต้องถามกลับอย่างชัดเจน ไม่คาดเดาอัตราภาษี
+3) วิเคราะห์เนื้อหาของธุรกรรม ไม่ยึดเพียงชื่อบัญชีหรือคำบนใบแจ้งหนี้
+4) ตรวจสอบหลักเกณฑ์ตามประมวลรัษฎากร คำสั่งกรมสรรพากร ท.ป.4/2528 และฉบับแก้ไขเพิ่มเติมที่ใช้บังคับ ณ วันที่จ่ายเงิน
+5) แสดงประเภทเงินได้ หน้าที่หักภาษี อัตรา ฐานคำนวณ สูตรคำนวณ ยอดหัก ยอดสุทธิ แบบนำส่ง และลิงก์แหล่งกฎหมายที่ตรวจสอบได้
+6) หากไม่สามารถตรวจสอบแหล่งกฎหมายได้ ให้แจ้งข้อจำกัด ห้ามสร้างเลขกฎหมายหรือลิงก์อ้างอิงขึ้นเอง
+7) กรณีผู้รับเงินต่างประเทศ เงื่อนไขเฉพาะ หรือรายการที่คลุมเครือ ให้แจ้งว่าต้องตรวจสอบเพิ่มเติม และระบุคำถามที่จำเป็น
+8) ผลลัพธ์ใช้เพื่อการศึกษา ต้องผ่านการตรวจสอบโดยนักบัญชีก่อนนำไปปฏิบัติจริง`;
+const SRC="https://rd.go.th/3479.html";
+const KB={income:[["40(1)","เงินได้จากการจ้างแรงงาน","เงินเดือน ค่าจ้าง โบนัส บำนาญ"],["40(2)","เงินได้เนื่องจากหน้าที่/ตำแหน่งงาน หรือการรับทำงานให้","ค่าธรรมเนียม ค่านายหน้า เบี้ยประชุม ค่าจ้างฟรีแลนซ์ทั่วไป"],["40(3)","ค่าแห่งกู๊ดวิลล์ ลิขสิทธิ์ หรือสิทธิอย่างอื่น","ลิขสิทธิ์หนังสือ เพลง ซอฟต์แวร์ สิทธิบัตร เครื่องหมายการค้า เงินปี"],["40(4)","ดอกเบี้ย เงินปันผล ส่วนแบ่งกำไร กำไรจากการโอนหุ้น/คริปโทฯ","ดอกเบี้ยเงินฝาก/หุ้นกู้/เงินกู้ยืม เงินปันผล ผลประโยชน์จากการโอนหุ้น ฯลฯ"],["40(5)","ค่าเช่าทรัพย์สิน","ค่าเช่าบ้าน คอนโด ที่ดิน รถยนต์ เครื่องจักร เงินกินเปล่า ค่าเซ้ง"],["40(6)","วิชาชีพอิสระ 6 วิชาชีพ (แพทย์ ทนาย วิศวกร สถาปนิก นักบัญชี ประณีตศิลปกรรม)","ค่าตรวจรักษา ค่าทนายความ ค่าออกแบบสถาปัตย์/วิศวกรรม ค่าสอบบัญชี/ทำบัญชี"],["40(7)","การรับเหมาที่ผู้รับเหมาลงทุนจัดหาของเอง","รับเหมาก่อสร้าง ตกแต่งภายใน ผลิตสินค้าตามสั่งโดยจัดหาวัสดุหลักเอง"],["40(8)","เงินได้จากธุรกิจ พาณิชย์ เกษตร อุตสาหกรรม ขนส่ง หรืออื่นนอกจาก 40(1)-(7)","ขายของออนไลน์ ร้านอาหาร ค้าปลีก-ค้าส่ง นักแสดง/อินฟลูเอนเซอร์ รีวิวสินค้า"]],
+wht:[["40(8)","ซื้อสินค้าเกษตร/แปรรูปตามรายการ (ยางแผ่น/ยางชนิดอื่น มันสำปะหลัง ปอ ข้าวโพด อ้อย เมล็ดกาแฟ ผลปาล์มน้ำมัน)","ผู้จ่าย: บริษัท/ห้างหุ้นส่วนนิติบุคคล/นิติบุคคลอื่น (ไม่รวมกลุ่มเกษตรกรตามกฎหมายสหกรณ์)","ผู้รับ: บริษัท/ห้างหุ้นส่วนนิติบุคคล","0.75%","หักทุกครั้งที่จ่าย เฉพาะผู้ซื้อและสินค้าตามเงื่อนไขข้อ 3(1)-(8) (รวม ท.ป.280/2560 และ ท.ป.281/2560)","ภ.ง.ด.53"],
+["40(2)","เงินได้จากหน้าที่/ตำแหน่งงาน หรือการรับทำงานให้","ผู้จ่าย: บริษัท/ห้างหุ้นส่วนนิติบุคคล/นิติบุคคลอื่น","ผู้รับ: บริษัท/ห้างหุ้นส่วนนิติบุคคลที่ประกอบกิจการในไทย (นอกจากมูลนิธิ/สมาคม)","3%","หักทุกครั้งที่จ่าย","ภ.ง.ด.53"],
+["40(2)","เงินได้จากหน้าที่/ตำแหน่งงาน หรือการรับทำงานให้","ผู้จ่าย: บริษัท/ห้างหุ้นส่วนนิติบุคคล/นิติบุคคลอื่น","ผู้รับ: มูลนิธิ/สมาคมที่ประกอบกิจการมีรายได้ (ไม่รวมที่รัฐมนตรีประกาศตามมาตรา 47(7)(ข))","10%","หักทุกครั้งที่จ่าย ยกเว้นที่รัฐมนตรีประกาศตามมาตรา 47(7)(ข)","ภ.ง.ด.53"],
+["40(3)","ค่าแห่งกู๊ดวิลล์ ลิขสิทธิ์ หรือสิทธิอย่างอื่น","ผู้จ่าย: บริษัท/ห้างหุ้นส่วนนิติบุคคล/นิติบุคคลอื่น","ผู้รับ: บริษัท/ห้างหุ้นส่วนนิติบุคคลที่ประกอบกิจการในไทย (นอกจากมูลนิธิ/สมาคม)","3%","หักทุกครั้งที่จ่าย","ภ.ง.ด.53"],
+["40(3)","ค่าแห่งกู๊ดวิลล์ ลิขสิทธิ์ หรือสิทธิอย่างอื่น","ผู้จ่าย: บริษัท/ห้างหุ้นส่วนนิติบุคคล/นิติบุคคลอื่น","ผู้รับ: มูลนิธิ/สมาคมที่มีรายได้ (ไม่รวมที่รัฐมนตรีประกาศตามมาตรา 47(7)(ข))","10%","หักทุกครั้งที่จ่าย ยกเว้นที่รัฐมนตรีประกาศตามมาตรา 47(7)(ข)","ภ.ง.ด.53"],
+["40(5)(ก)","ค่าเช่าทรัพย์สิน","ผู้จ่าย: บริษัท/ห้างหุ้นส่วนนิติบุคคล/นิติบุคคลอื่น","ผู้รับ: บุคคลธรรมดา/นิติบุคคล/มูลนิธิหรือสมาคม","5% (หรือตามอัตราที่กำหนดในข้อ 6 ; มูลนิธิ/สมาคม 10%)","หักทุกครั้งตามหลักเกณฑ์ข้อ 6","ภ.ง.ด.3 / ภ.ง.ด.53"],
+["40(6)","วิชาชีพอิสระ (โรคศิลปะ กฎหมาย วิศวกรรม สถาปัตยกรรม บัญชี ประณีตศิลปกรรม)","ผู้จ่าย: บริษัท/ห้างหุ้นส่วนนิติบุคคล/นิติบุคคลอื่น","ผู้รับ: ผู้รับเงินได้ตามมาตรา 40(6)","3% (มูลนิธิ/สมาคม 10%)","หักทุกครั้งตามหลักเกณฑ์ข้อ 8","ภ.ง.ด.3 / ภ.ง.ด.53"],
+["40(8)","ค่าโฆษณา","ผู้จ่าย: บริษัท/ห้างหุ้นส่วนนิติบุคคล/นิติบุคคลอื่น","ผู้รับ: ผู้รับเงินค่าโฆษณา","2%","หักทุกครั้งตามหลักเกณฑ์ข้อ 10","ภ.ง.ด.3 / ภ.ง.ด.53"],
+["40(7), 40(8)","ค่าจ้างทำของ / ค่าบริการ","ผู้จ่าย: บริษัท/ห้างหุ้นส่วนนิติบุคคล/นิติบุคคลอื่น","ผู้รับ: ผู้รับเงินค่าจ้างทำของหรือค่าบริการ","3%","หักทุกครั้งตามหลักเกณฑ์และข้อยกเว้นข้อ 12/1","ภ.ง.ด.3 / ภ.ง.ด.53"],
+["40(8)","รางวัล ส่วนลด หรือประโยชน์จากการส่งเสริมการขาย","ผู้จ่าย: บริษัท/ห้างหุ้นส่วนนิติบุคคล/นิติบุคคลอื่น","ผู้รับ: ผู้รับรางวัล/ส่วนลด/ประโยชน์","3% (หรืออัตราตามข้อ 12/2)","หักทุกครั้งตามเงื่อนไขข้อ 12/2","ภ.ง.ด.3 / ภ.ง.ด.53"],
+["40(8)","ค่าเบี้ยประกันวินาศภัย","ผู้จ่าย: บริษัท/ห้างหุ้นส่วนนิติบุคคล/นิติบุคคลอื่น","ผู้รับ: ผู้รับเงินค่าเบี้ยประกันวินาศภัย","1%","หักทุกครั้งตามหลักเกณฑ์ข้อ 12/3","ภ.ง.ด.53"],
+["40(8)","ค่าขนส่ง (ไม่รวมค่าโดยสารขนส่งสาธารณะ)","ผู้จ่าย: บริษัท/ห้างหุ้นส่วนนิติบุคคล/นิติบุคคลอื่น","ผู้รับ: ผู้รับเงินค่าขนส่ง","1%","หักทุกครั้ง โดยไม่รวมค่าโดยสารขนส่งสาธารณะ ตามข้อ 12/4","ภ.ง.ด.3 / ภ.ง.ด.53"]]};
+const EX=[
+{payee:2,res:0,desc:"ค่าจ้างออกแบบโลโก้และคู่มือแบรนด์ ผู้รับจ้างออกแบบเองทั้งหมด ไม่ได้จัดหาวัสดุ",amt:50000,vm:"sep"},
+{payee:1,res:0,desc:"ค่าขนส่งสินค้าจากโกดังไปส่งลูกค้า ตามใบแจ้งหนี้เดือนนี้",amt:12000,vm:"sep"},
+{payee:2,res:0,desc:"ค่าเช่าอาคารสำนักงานรายเดือน",amt:80000,vm:"none"},
+{payee:0,res:0,desc:"ซื้อหัวมันสำปะหลังสดจากบริษัทผู้ค้าพืชไร่",amt:200000,vm:"none"}];
+const $=id=>document.getElementById(id);
+const fmt=n=>n.toLocaleString("th-TH",{minimumFractionDigits:2,maximumFractionDigits:2});
+const esc=s=>String(s==null?"":s);
+let addendum="",lastResult=null,lastInput=null;
+$("date").valueAsDate=new Date();
+try{$("master").value=localStorage.getItem("wht_master")||DEFAULT_MASTER}catch(e){$("master").value=DEFAULT_MASTER}
+$("master").addEventListener("input",()=>{try{localStorage.setItem("wht_master",$("master").value)}catch(e){}});
+$("reset").onclick=()=>{$("master").value=DEFAULT_MASTER;try{localStorage.removeItem("wht_master")}catch(e){}};
+$("vm").onchange=()=>{$("vw").style.display=$("vm").value==="sep"?"":"none"};
+document.querySelectorAll("[data-ex]").forEach(b=>b.onclick=()=>{const x=EX[b.dataset.ex];$("payee").selectedIndex=x.payee;$("res").selectedIndex=x.res;$("desc").value=x.desc;$("amt").value=x.amt;$("vm").value=x.vm;$("vm").onchange()});
+
+function getInput(){const sel=i=>$(i).options[$(i).selectedIndex].text;return{payer:sel("payer"),payee:sel("payee"),payeeResidence:sel("res"),description:$("desc").value.trim(),amount:parseFloat($("amt").value),vatMode:$("vm").value,vatAmount:$("vat").value===""?null:parseFloat($("vat").value),paymentDate:$("date").value,specialConditions:$("sp").value.trim()||"ไม่มี"}}
+function buildPrompt(inp){
+const schema=`{"status":"complete|need_info|review","summary":"สรุปสั้น 1-2 ประโยค","missing":["คำถามที่ต้องถามกลับ"],"incomeType":{"section":"เช่น 40(2) หรือ -","name":"ประเภทเงินได้","why":"เหตุผลจากเนื้อหาธุรกรรม"},"withhold":"yes|no|unclear","withholdReason":"หน้าที่หักภาษีและเหตุผล","rate":ตัวเลขเปอร์เซ็นต์ เช่น 3 หรือ null,"rateNote":"หมายเหตุอัตรา","baseNote":"คำอธิบายฐานภาษี","form":"แบบนำส่ง","legal":[{"text":"ชื่อแหล่งกฎหมาย","url":"ลิงก์"}],"cautions":["ข้อควรระวัง"]}`;
+return `${$("master").value.trim()}
+
+[ฐานความรู้ที่ใช้ได้ (JSON) — ใช้อัตราและเงื่อนไขจากฐานนี้เท่านั้น ห้ามเดาอัตราที่ไม่มีในฐาน]
+แหล่งอ้างอิงที่ตรวจสอบได้เพียงรายการเดียว: ${SRC}
+${JSON.stringify(KB)}
+
+[ข้อมูลนำเข้า]
+${JSON.stringify(inp)}
+${addendum?`
+[คำสั่งปรับแก้เพิ่มเติมจากผู้ใช้ — ให้ปฏิบัติตามหากไม่ขัดกับกฎหมายและกฎข้างต้น]
+${addendum}
+[ผลวิเคราะห์ครั้งก่อน]
+${JSON.stringify(lastResult)}
+`:""}
+[รูปแบบผลลัพธ์] ตอบเป็น JSON ตามโครงสร้างนี้เท่านั้น ไม่มีข้อความอื่นหรือ markdown:
+${schema}
+กติกา: ถ้าข้อมูลจำเป็นขาด (เช่น สถานะผู้รับไม่ทราบ ลักษณะงานไม่ชัด) ให้ status=need_info และใส่คำถามใน missing โดย rate=null; ถ้าเป็นผู้รับต่างประเทศหรือรายการคลุมเครือ/ไม่มีในฐานความรู้ ให้ status=review; legal.url ใช้ได้เฉพาะ ${SRC} ห้ามสร้างเลขคำสั่งหรือลิงก์ขึ้นเอง; ข้อความทั้งหมดเป็นภาษาไทย; ฐานภาษีคือยอดก่อน VAT เมื่อ VAT แยกจากราคา`}
+
+$("copy").onclick=async()=>{const t=buildPrompt(getInput());try{await navigator.clipboard.writeText(t);$("copy").textContent="คัดลอกแล้ว"}catch(e){$("copy").textContent="คัดลอกไม่สำเร็จ"}setTimeout(()=>$("copy").textContent="คัดลอก prompt ที่ประกอบแล้ว",1800)};
+
+let sampleFn=null;
+(async()=>{try{if(window.claude&&claude.use)sampleFn=await claude.use("sample")}catch(e){}if(!sampleFn){$("go").disabled=true;$("nosample").hidden=false}})();
+
+function h(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e}
+function card(num,title){const c=h("div","card");const t=h("h2");t.append(h("span","num",num),title);c.append(t);return c}
+function kv(pairs){const d=h("dl","kv");pairs.forEach(([k,v])=>{if(v==null||v==="")return;d.append(h("dt",null,k),h("dd",null,v))});return d}
+function safeLink(u){try{const x=new URL(u);return x.protocol==="https:"&&(x.hostname==="rd.go.th"||x.hostname==="www.rd.go.th")?x.href:null}catch(e){return null}}
+
+function render(r,inp){
+const o=$("out");o.textContent="";
+const st=r.status,wh=r.withhold;
+const b=h("div","banner "+(st==="complete"?(wh==="yes"?"b-ok":"b-ok"):st==="need_info"?"b-warn":"b-bad"),
+ st==="need_info"?"ข้อมูลยังไม่เพียงพอ — กรุณาตอบคำถามด้านล่างก่อน ระบบจะไม่คาดเดาอัตราภาษี":st==="review"?"รายการนี้ต้องตรวจสอบเพิ่มเติมโดยผู้เชี่ยวชาญ":(wh==="yes"?"ต้องหักภาษี ณ ที่จ่าย":wh==="no"?"ไม่ต้องหักภาษี ณ ที่จ่าย":"ยังสรุปหน้าที่หักภาษีไม่ได้"));
+o.append(b);
+if(r.summary){const s=h("div","card");s.append(h("div",null,r.summary));o.append(s)}
+if(r.missing&&r.missing.length){const c=card("?","คำถามที่ต้องถามกลับ");const u=h("ul");r.missing.forEach(q=>u.append(h("li",null,q)));c.append(u);c.append(h("p","note","เพิ่มคำตอบในช่อง “ข้อมูลพิเศษ” หรือกล่องปรับแก้ด้านล่าง แล้ววิเคราะห์ใหม่"));o.append(c)}
+const it=r.incomeType||{};
+const c1=card("1","ประเภทเงินได้");c1.append(kv([["มาตรา",it.section],["ประเภท",it.name],["เหตุผล",it.why]]));o.append(c1);
+const c2=card("2","หน้าที่หักภาษี");c2.append(kv([["ต้องหักหรือไม่",wh==="yes"?"ต้องหัก":wh==="no"?"ไม่ต้องหัก":"ยังไม่ชัดเจน"],["เหตุผล",r.withholdReason]]));o.append(c2);
+const c3=card("3","อัตราและฐานภาษี");c3.append(kv([["อัตรา",typeof r.rate==="number"?r.rate+"%":"ยังไม่กำหนด"],["หมายเหตุอัตรา",r.rateNote],["ฐานคำนวณ",r.baseNote]]));o.append(c3);
+// calculation (done in code from the model's rate, for arithmetic accuracy)
+const c4=card("4","การคำนวณ");
+const amt=inp.amount,vm=inp.vatMode;
+const vat=vm==="sep"?(inp.vatAmount!=null?inp.vatAmount:Math.round(amt*7)/100):0;
+const base=vm==="inc"?amt:amt;const total=vm==="sep"?amt+vat:amt;
+if(wh==="yes"&&typeof r.rate==="number"&&st!=="need_info"){
+ const tax=Math.round(base*r.rate)/100;
+ c4.append(h("p","note",`สูตร: ฐานภาษี × ${r.rate}% = ${fmt(base)} × ${r.rate}% = ${fmt(tax)} บาท`+(vm==="inc"?" (ราคารวม VAT ไม่แยก จึงใช้ยอดรวมเป็นฐาน)":vm==="sep"?" (VAT แยกจากราคา จึงไม่นำ VAT มาเป็นฐาน)":"")));
+ const t=h("table");const rows=[["จำนวนเงินตามใบแจ้งหนี้",fmt(amt)]];if(vm==="sep")rows.push(["VAT",fmt(vat)],["รวมที่ต้องจ่ายก่อนหักภาษี",fmt(total)]);rows.push(["ฐานภาษี",fmt(base)],["ภาษีหัก ณ ที่จ่าย",fmt(tax)]);
+ rows.forEach(([k,v])=>{const tr=h("tr");tr.append(h("td",null,k),h("td",null,v));t.append(tr)});
+ const tr=h("tr","t");tr.append(h("td",null,"ยอดจ่ายสุทธิ (บาท)"),h("td",null,fmt(total-tax)));t.append(tr);
+ const w=h("div","scroll");w.append(t);c4.append(w);
+}else if(wh==="no"){c4.append(h("p",null,"ภาษีหัก ณ ที่จ่าย 0.00 บาท — จ่ายสุทธิ "+fmt(total)+" บาท"))}
+else c4.append(h("p","note","ยังคำนวณไม่ได้ จนกว่าจะได้ข้อมูลครบหรือผ่านการตรวจสอบเพิ่มเติม"));
+o.append(c4);
+const c5=card("5","แบบนำส่งและแหล่งกฎหมาย");c5.append(kv([["แบบนำส่ง (ผู้จ่ายยื่น)",r.form]]));
+const ul=h("ul");let n=0;(r.legal||[]).forEach(l=>{const li=h("li");const u=safeLink(l.url);if(u){const a=h("a",null,l.text||u);a.href=u;a.target="_blank";a.rel="noopener noreferrer";li.append(a)}else li.textContent=(l.text||"")+" (ไม่มีลิงก์ที่ตรวจสอบได้ในระบบ)";ul.append(li);n++});
+if(!n)ul.append(h("li",null,"ไม่สามารถตรวจสอบแหล่งกฎหมายได้ในระบบ ผู้ใช้ต้องตรวจสอบเอง"));
+c5.append(ul);o.append(c5);
+const c6=card("6","ข้อควรระวัง");const cu=h("ul");(r.cautions||[]).forEach(x=>cu.append(h("li",null,x)));cu.append(h("li",null,"ผลลัพธ์ใช้เพื่อการศึกษา ต้องผ่านการตรวจสอบโดยนักบัญชีก่อนนำไปปฏิบัติจริง"));c6.append(cu);o.append(c6);
+// post-analysis revision
+const c7=card("↻","ปรับแก้หลังวิเคราะห์");
+const ta=h("textarea");ta.id="add";ta.value=addendum;ta.placeholder="เช่น ผู้รับเงินเป็นนิติบุคคลที่จดทะเบียนในไทย / ถือว่างานนี้เป็นค่าบริการ / ตอบคำถามที่ถามกลับ";
+const bt=h("button","p","วิเคราะห์ใหม่ด้วยคำสั่งนี้");bt.type="button";
+bt.onclick=()=>{addendum=ta.value.trim();run(true)};
+const cl=h("button",null,"ล้างคำสั่งเสริม");cl.type="button";cl.style.marginTop="8px";cl.onclick=()=>{addendum="";ta.value=""};
+c7.append(h("p","note","แก้ Master Prompt ด้านซ้ายและ/หรือเพิ่มคำสั่งที่นี่ แล้วสั่งวิเคราะห์ใหม่"),ta,bt,cl);o.append(c7);
+}
+
+async function run(again){
+if(!sampleFn)return;
+const inp=again&&lastInput?lastInput:getInput();
+if(!inp.description||!(inp.amount>=0)||!inp.paymentDate){$("out").textContent="";const c=h("div","banner b-warn","กรุณากรอกลักษณะงาน จำนวนเงิน และวันที่จ่ายเงินให้ครบ");$("out").append(c);return}
+lastInput=inp;if(!again){addendum=""}
+const btns=[$("go")];btns.forEach(b=>b.disabled=true);
+const o=$("out");o.textContent="";const l=h("div","card empty");l.append(h("span","spin"),"กำลังวิเคราะห์…");o.append(l);
+try{
+ const r=await sampleFn.json(buildPrompt(inp),{modelTier:"complex",cache:false});
+ lastResult=r;render(r,inp);
+}catch(e){
+ o.textContent="";const m=e&&e.code==="not_granted"?"ไม่ได้รับอนุญาตให้ใช้ AI ในหน้านี้":e&&e.code==="rate_limited"?"มีการเรียกใช้ถี่เกินไป โปรดรอสักครู่แล้วลองใหม่":"วิเคราะห์ไม่สำเร็จ โปรดลองใหม่อีกครั้ง";
+ o.append(h("div","banner b-bad",m));
+}
+btns.forEach(b=>b.disabled=false);
+}
+$("f").addEventListener("submit",e=>{e.preventDefault();run(false)});
+$("vm").onchange();
+</script>
+</body>
+</html>
